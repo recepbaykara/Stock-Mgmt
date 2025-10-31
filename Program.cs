@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockMgmt.Models;
-using StockMgmt;
+using StockMgmt.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,13 +24,16 @@ app.UseHttpsRedirection();
 
 // Users
 app.MapGet("/users", async (AppDbContext db) => await db.Users.ToListAsync());
+
 app.MapGet("/users/{id}", async (int id, AppDbContext db) => await db.Users.FindAsync(id));
+
 app.MapPost("/users", async (User user, AppDbContext db) =>
 {
     db.Users.Add(user);
     await db.SaveChangesAsync();
     return Results.Created($"/users/{user.Id}", user);
 });
+
 app.MapPut("/users/{id}", async (int id, User inputUser, AppDbContext db) =>
 {
     var user = await db.Users.FindAsync(id);
@@ -45,6 +48,7 @@ app.MapPut("/users/{id}", async (int id, User inputUser, AppDbContext db) =>
 
     return Results.NoContent();
 });
+
 app.MapDelete("/users/{id}", async (int id, AppDbContext db) =>
 {
     var user = await db.Users.FindAsync(id);
