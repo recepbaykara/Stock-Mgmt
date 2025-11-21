@@ -1,14 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using StockMgmt.Enums;
 
 namespace StockMgmt.Models;
-
-public enum PaymentMethod
-{
-    Debit,
-    Credit,
-    OnArrival,
-    Cupon
-}
 
 public class Order
 {
@@ -27,7 +20,7 @@ public class Order
     
     public DateTimeOffset OrderDate { get; set; }
     
-    public User User { get; set; }
+    public int UserId { get; set; }
     
-    public Product Product { get; set; }
+    public int ProductId { get; set; }
 }
