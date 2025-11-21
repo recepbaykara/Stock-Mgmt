@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StockMgmt.Models;
 using StockMgmt.Context;
 using StockMgmt.DTOs;
+using StockMgmt.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -22,6 +25,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapControllers();
 
 // Users
 app.MapGet("/users", async (AppDbContext db) => await db.Users.ToListAsync());
