@@ -1,14 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using StockMgmt.Enums;
 
 namespace StockMgmt.Models;
-
-public enum PaymentMethod
-{
-    Debit,
-    Credit,
-    OnArrival,
-    Cupon
-}
 
 public class Order
 {

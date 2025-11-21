@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StockMgmt.Models;
 using StockMgmt.Context;
+using StockMgmt.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +94,7 @@ app.MapGet("/orders", async (AppDbContext db) => await db.Orders.ToListAsync());
 app.MapGet("/orders/{id}", async (int id, AppDbContext db) =>  await db.Orders.FindAsync());
 app.MapPost("/orders", async (Order order, AppDbContext db) =>
 {
+    if (order.Quantity < 0) return Results.Conflict("Quantity cannot be negative");
     var product = await db.Products.FindAsync(order.ProductId);
     if (product is null) return Results.NotFound("Product not found");
     if (product.Stock < order.Quantity) return Results.Conflict("Not enough stock");
@@ -102,18 +104,33 @@ app.MapPost("/orders", async (Order order, AppDbContext db) =>
     await db.SaveChangesAsync();
     return Results.Created($"/orders/{order.Id}", order);
 });
-app.MapPut("/orders/{id}", async (int id, Order inputOrder, AppDbContext db) =>
+app.MapPut("/orders/{id}", async (int id, OrderUpdate inputOrder, AppDbContext db) =>
 {
     var order = await db.Orders.FindAsync(id);
     if (order is null) return Results.NotFound("Order not found");
+    if (inputOrder.Quantity < 0)
+    {
+        return Results.Conflict("Quantity cannot be negative");
+    }
+    else if (inputOrder.Quantity > order.Quantity) 
+    {
+        var product = await db.Products.FindAsync(order.ProductId);
+        if (product is null) return Results.NotFound("Product not found");
+        if (product.Stock < order.Quantity) return Results.Conflict("Not enough stock");
+        product.Stock -= order.Quantity;
+        db.Products.Update(product);
+    }
+    else if (inputOrder.Quantity < order.Quantity)
+    {
+        var  product = await db.Products.FindAsync(order.ProductId);
+        if (product is null) return Results.NotFound("Product not found");
+        product.Stock += (order.Quantity - inputOrder.Quantity);
+        db.Products.Update(product);
+    }
     order.Name = inputOrder.Name;
     order.Description = inputOrder.Description;
     order.Address = inputOrder.Address;
     order.PaymentMethod = inputOrder.PaymentMethod;
-    order.Quantity = inputOrder.Quantity;
-    order.OrderDate = inputOrder.OrderDate;
-    order.UserId = inputOrder.UserId;
-    order.ProductId = inputOrder.ProductId;
     
     await db.SaveChangesAsync();
     return Results.Ok();
