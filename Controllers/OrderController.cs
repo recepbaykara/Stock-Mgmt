@@ -7,9 +7,14 @@ namespace StockMgmt.Controllers;
 
 [ApiController]
 [Route("/api/v1/orders")]
-public class OrderController(OrderService orderService) : Controller
+public class OrderController : Controller
 {
-    private readonly OrderService _orderService = orderService;
+    private readonly OrderService _orderService;
+
+    public OrderController(OrderService orderService)
+    {
+        _orderService = orderService;
+    }
     
     [HttpGet]
     public async Task<ApiResponse<List<Order>>> GetAll()
@@ -35,4 +40,6 @@ public class OrderController(OrderService orderService) : Controller
             Data = order
         };
     }
+    
+    
 }
