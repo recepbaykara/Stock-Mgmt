@@ -34,7 +34,7 @@ public class OrderService(AppDbContext context)
         if (product is null)
             throw new Exception("Product not found");
         if (product.Stock < orderCreate.Quantity)
-            throw new Exception("Quantity cannot be greater than stock");
+            throw new Exception($"Quantity cannot be greater than stock {product.Stock}");
 
         product.Stock -= orderCreate.Quantity;
         _context.Products.Update(product);
