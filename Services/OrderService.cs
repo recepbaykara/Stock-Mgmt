@@ -2,11 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using StockMgmt.Context;
 using StockMgmt.DTOs;
 using StockMgmt.Enums;
+using StockMgmt.Interfaces;
 using StockMgmt.Models;
 
 namespace StockMgmt.Services;
 
-public class OrderService(AppDbContext context)
+public class OrderService(AppDbContext context) : IOrderService
 {
     private readonly AppDbContext _context = context;
 
