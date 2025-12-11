@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
