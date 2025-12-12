@@ -35,39 +35,39 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
 
     public async Task<Order> CreateAsync(OrderCreate orderCreate)
     {
-        _logger.LogDebug("CreateAsync method called: User={UserId}, Product={ProductId}, Quantity={Quantity}", 
+        _logger.LogDebug("CreateAsync method called: User={UserId}, Product={ProductId}, Quantity={Quantity}",
             orderCreate.UserId, orderCreate.ProductId, orderCreate.Quantity);
-            
+
         if (orderCreate.Quantity < 1)
         {
             _logger.LogWarning("Invalid quantity: Quantity={Quantity}", orderCreate.Quantity);
             throw new Exception("Quantity must be greater than zero");
         }
-            
+
         var user = await _context.Users.FindAsync(orderCreate.UserId);
         if (user is null)
         {
             _logger.LogWarning("User not found: UserId={UserId}", orderCreate.UserId);
             throw new Exception("User not found");
         }
-            
+
         var product = await _context.Products.FindAsync(orderCreate.ProductId);
         if (product is null)
         {
             _logger.LogWarning("Product not found: ProductId={ProductId}", orderCreate.ProductId);
             throw new Exception("Product not found");
         }
-            
+
         if (product.Stock < orderCreate.Quantity)
         {
-            _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}", 
+            _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}",
                 orderCreate.ProductId, product.Stock, orderCreate.Quantity);
             throw new Exception($"Quantity cannot be greater than stock {product.Stock}");
         }
 
         product.Stock -= orderCreate.Quantity;
         _context.Products.Update(product);
-        _logger.LogDebug("Stock updated: ProductId={ProductId}, NewStock={NewStock}", 
+        _logger.LogDebug("Stock updated: ProductId={ProductId}, NewStock={NewStock}",
             product.Id, product.Stock);
 
         var order = new Order
@@ -84,24 +84,24 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
 
         await _context.Orders.AddAsync(order);
         await _context.SaveChangesAsync();
-        
-        _logger.LogInformation("Order created: OrderId={OrderId}, User={UserId}, Product={ProductId}, Quantity={Quantity}", 
+
+        _logger.LogInformation("Order created: OrderId={OrderId}, User={UserId}, Product={ProductId}, Quantity={Quantity}",
             order.Id, order.UserId, order.ProductId, order.Quantity);
 
         return order;
     }
-    
+
     public async Task<Order> UpdateAsync(int id, OrderUpdate orderUpdate)
     {
         _logger.LogDebug("UpdateAsync method called: OrderId={OrderId}", id);
-        
+
         var existingOrder = await _context.Orders.FindAsync(id);
         if (existingOrder is null)
         {
             _logger.LogWarning("Order not found: OrderId={OrderId}", id);
             throw new Exception("Order not found");
         }
-        
+
         var user = await _context.Users.FindAsync(existingOrder.UserId);
         if (user is null)
         {
@@ -130,19 +130,19 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
         {
             if (product.Stock < difference)
             {
-                _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}", 
+                _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}",
                     existingOrder.ProductId, product.Stock, difference);
                 throw new Exception("Updated quantity exceeds available stock");
             }
 
             product.Stock -= difference;
-            _logger.LogDebug("Stock decreased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}", 
+            _logger.LogDebug("Stock decreased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}",
                 product.Id, difference, product.Stock);
         }
         else if (difference < 0)
         {
             product.Stock += Math.Abs(difference);
-            _logger.LogDebug("Stock increased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}", 
+            _logger.LogDebug("Stock increased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}",
                 product.Id, Math.Abs(difference), product.Stock);
         }
 
@@ -156,16 +156,16 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
 
         _context.Orders.Update(existingOrder);
         await _context.SaveChangesAsync();
-        
+
         _logger.LogInformation("Order updated: OrderId={OrderId}, NewQuantity={NewQuantity}", id, newQty);
 
         return existingOrder;
     }
-    
+
     public async Task<Order> PatchAsync(int id, OrderPatch patchDto)
     {
         _logger.LogDebug("PatchAsync method called: OrderId={OrderId}", id);
-        
+
         var order = await _context.Orders.FindAsync(id);
         if (order is null)
         {
@@ -203,19 +203,19 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
             {
                 if (product.Stock < diff)
                 {
-                    _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}", 
+                    _logger.LogWarning("Insufficient stock: ProductId={ProductId}, Stock={Stock}, Requested={Requested}",
                         order.ProductId, product.Stock, diff);
                     throw new Exception("Updated quantity exceeds available stock");
                 }
 
                 product.Stock -= diff;
-                _logger.LogDebug("Stock decreased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}", 
+                _logger.LogDebug("Stock decreased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}",
                     product.Id, diff, product.Stock);
             }
             else if (diff < 0)
             {
                 product.Stock += Math.Abs(diff);
-                _logger.LogDebug("Stock increased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}", 
+                _logger.LogDebug("Stock increased: ProductId={ProductId}, Difference={Difference}, NewStock={NewStock}",
                     product.Id, Math.Abs(diff), product.Stock);
             }
 
@@ -237,16 +237,16 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
 
         _context.Orders.Update(order);
         await _context.SaveChangesAsync();
-        
+
         _logger.LogInformation("Order partially updated (patched): OrderId={OrderId}", id);
 
         return order;
     }
-    
+
     public async Task<bool> DeleteAsync(int id)
     {
         _logger.LogDebug("DeleteAsync method called: OrderId={OrderId}", id);
-        
+
         var order = await _context.Orders.FindAsync(id);
         if (order is null)
         {
@@ -270,14 +270,14 @@ public class OrderService(AppDbContext context, ILogger<OrderService> logger) : 
 
         product.Stock += order.Quantity;
         _context.Products.Update(product);
-        _logger.LogDebug("Stock returned: ProductId={ProductId}, Quantity={Quantity}, NewStock={NewStock}", 
+        _logger.LogDebug("Stock returned: ProductId={ProductId}, Quantity={Quantity}, NewStock={NewStock}",
             product.Id, order.Quantity, product.Stock);
 
         _context.Orders.Remove(order);
 
         await _context.SaveChangesAsync();
-        
-        _logger.LogInformation("Order deleted: OrderId={OrderId}, ProductId={ProductId}, Quantity={Quantity}", 
+
+        _logger.LogInformation("Order deleted: OrderId={OrderId}, ProductId={ProductId}, Quantity={Quantity}",
             id, order.ProductId, order.Quantity);
 
         return true;

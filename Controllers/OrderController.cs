@@ -18,7 +18,7 @@ public class OrderController : Controller
         _orderService = orderService;
         _logger = logger;
     }
-    
+
     [HttpGet]
     public async Task<ApiResponse<List<Order>>> GetAll()
     {
@@ -66,7 +66,7 @@ public class OrderController : Controller
     {
         try
         {
-            _logger.LogInformation("Creating new order: User={UserId}, Product={ProductId}, Quantity={Quantity}", 
+            _logger.LogInformation("Creating new order: User={UserId}, Product={ProductId}, Quantity={Quantity}",
                 orderCreate.UserId, orderCreate.ProductId, orderCreate.Quantity);
             var order = await _orderService.CreateAsync(orderCreate);
             _logger.LogInformation("Order created successfully: OrderId={OrderId}", order.Id);
@@ -80,7 +80,7 @@ public class OrderController : Controller
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error creating order: User={UserId}, Product={ProductId}", 
+            _logger.LogError(e, "Error creating order: User={UserId}, Product={ProductId}",
                 orderCreate.UserId, orderCreate.ProductId);
             return new ApiResponse<Order>()
             {
@@ -119,7 +119,7 @@ public class OrderController : Controller
             };
         }
     }
-    
+
     [HttpPatch("{id}")]
     public async Task<ApiResponse<Order>> Patch([FromRoute] int id, [FromBody] OrderPatch patchDto)
     {
@@ -146,7 +146,7 @@ public class OrderController : Controller
             };
         }
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<ApiResponse<bool>> Delete([FromRoute] int id)
     {
