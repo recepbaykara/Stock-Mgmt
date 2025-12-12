@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StockMgmt.Models;
 using StockMgmt.Context;
 using StockMgmt.DTOs;
+using StockMgmt.Interfaces;
 using StockMgmt.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddOpenApi();
-builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using StockMgmt.Common;
 using StockMgmt.DTOs;
+using StockMgmt.Interfaces;
 using StockMgmt.Models;
-using StockMgmt.Services;
 
 namespace StockMgmt.Controllers;
 
@@ -10,9 +10,9 @@ namespace StockMgmt.Controllers;
 [Route("/api/v1/orders")]
 public class OrderController : Controller
 {
-    private readonly OrderService _orderService;
+    private readonly IOrderService _orderService;
 
-    public OrderController(OrderService orderService)
+    public OrderController(IOrderService orderService)
     {
         _orderService = orderService;
     }
