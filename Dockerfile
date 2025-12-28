@@ -32,8 +32,10 @@ ENV PATH="$PATH:/tools"
 RUN dotnet ef migrations bundle \
     --project StockMgmt.csproj \
     --startup-project StockMgmt.csproj \
+    --context AppDbContext \
     --configuration Release \
-    --output /app/efbundle
+    --output /app/efbundle \
+    --verbose
 
 FROM base AS final
 WORKDIR /app
