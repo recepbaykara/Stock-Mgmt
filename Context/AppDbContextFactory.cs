@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using StockMgmt.Context;
 
 public class AppDbContextFactory 
     : IDesignTimeDbContextFactory<AppDbContext>
