@@ -1,9 +1,5 @@
 name: Stock-Mgmt Pipeline
 
-premissions:
-  contents: read
-  packages: write
-
 on:
   push:
     branches:
@@ -15,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    premissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
