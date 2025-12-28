@@ -23,8 +23,11 @@ RUN dotnet publish "StockMgmt.csproj" \
 
 FROM build AS migrations
 
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet tool install dotnet-ef \
+    --tool-path /tools \
+    --version 9.0.*
+
+ENV PATH="$PATH:/tools"
 
 RUN dotnet ef migrations bundle \
     --project StockMgmt.csproj \
