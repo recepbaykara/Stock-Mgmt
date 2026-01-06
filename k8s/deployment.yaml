@@ -23,6 +23,12 @@ spec:
               value: Development
             - name: ConnectionStrings__DefaultConnection
               value: Host=postgres;Port=5432;Database=stockdb;Username=stockuser;Password=stockpass
+            - name: JAEGER_HOST
+              value: jaeger.monitoring
+            - name: JAEGER_PORT
+              value: "6831"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring:4317
 ---
 
 apiVersion: v1

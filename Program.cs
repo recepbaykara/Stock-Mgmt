@@ -1,5 +1,9 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using StockMgmt.Models;
 using StockMgmt.Context;
 using StockMgmt.DTOs;
@@ -26,6 +30,53 @@ try
     Log.Information("Starting StockMgmt application...");
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // Configure OpenTelemetry
+    var otelResourceBuilder = ResourceBuilder.CreateDefault()
+        .AddService(serviceName: "StockMgmt", serviceVersion: "1.0.0")
+        .AddEnvironmentVariableDetector();
+
+    builder.Services
+        .AddOpenTelemetry()
+        .WithResources(otelResourceBuilder)
+        .WithTracing(tracing =>
+            tracing
+                .AddAspNetCoreInstrumentation(options =>
+                {
+                    options.RecordException = true;
+                    options.EnrichOnException = (activity, exception) =>
+                    {
+                        activity?.SetTag("exception.type", exception.GetType().Name);
+                        activity?.SetTag("exception.message", exception.Message);
+                    };
+                })
+                .AddHttpClientInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation(options =>
+                {
+                    options.SetDbStatementForText = true;
+                    options.EnrichWithIQueryable = true;
+                })
+                .AddConsoleExporter()
+                .AddJaegerExporter(jaegerOptions =>
+                {
+                    jaegerOptions.AgentHost = Environment.GetEnvironmentVariable("JAEGER_HOST") ?? "localhost";
+                    jaegerOptions.AgentPort = int.Parse(Environment.GetEnvironmentVariable("JAEGER_PORT") ?? "6831");
+                }))
+        .WithMetrics(metrics =>
+            metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddConsoleExporter()
+                .AddProcessInstrumentation());
+
+    builder.Logging.AddOpenTelemetry(loggerOptions =>
+    {
+        loggerOptions
+            .SetResourceBuilder(otelResourceBuilder)
+            .AddConsoleExporter()
+            .AddOtlpExporter();
+    });
 
     builder.Host.UseSerilog((context, services, loggerConfiguration) =>
         loggerConfiguration
