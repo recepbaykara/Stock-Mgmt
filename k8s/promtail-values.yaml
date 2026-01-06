@@ -1,0 +1,19 @@
+promtail:
+  config:
+    snippets:
+      pipelineStages:
+        - docker: {}
+        - json:
+            expressions:
+              timestamp: timestamp
+              level: level
+              service: service
+              environment: environment
+              method: method
+              path: path
+              statusCode: statusCode
+              traceId: traceId
+              message: message
+              userId: userId
+              productId: productId
+              exception: exception

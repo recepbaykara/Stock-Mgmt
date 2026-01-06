@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-mgmt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-mgmt
+  template:
+    metadata:
+      labels:
+        app: stock-mgmt
+    spec:
+      containers:
+        - name: stock-mgmt
+          image: ghcr.io/recepbaykara/stock-mgmt:sha-8e1746c6983ea57644874a1b3fcc3d67b425eb1d
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ConnectionStrings__DefaultConnection
+              value: Host=postgres;Port=5432;Database=stockdb;Username=stockuser;Password=stockpass
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-mgmt
+spec:
+  type: LoadBalancer
+  selector:
+    app: stock-mgmt
+  ports:
+    - port: 80
+      targetPort: 8080

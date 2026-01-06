@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: stock-mgmt-migration
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: ghcr.io/recepbaykara/stock-mgmt:sha-8e1746c6983ea57644874a1b3fcc3d67b425eb1d
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Running EF migration bundle..."
+              /app/efbundle --verbose
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ConnectionStrings__DefaultConnection
+              value: Host=postgres;Port=5432;Database=stockdb;Username=stockuser;Password=stockpass
+
