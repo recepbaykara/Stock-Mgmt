@@ -31,35 +31,42 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Configure OpenTelemetry
-    builder.Services
-        .AddOpenTelemetry()
-        .ConfigureResource(resource => resource
+    var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT")
+        ?? "http://otel-collector.monitoring:4317";
+
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(res => res
             .AddService(serviceName: "StockMgmt", serviceVersion: "1.0.0")
             .AddEnvironmentVariableDetector())
-        .WithTracing(tracing =>
-            tracing
-                .AddAspNetCoreInstrumentation(options =>
-                {
-                    options.RecordException = true;
-                })
-                .AddHttpClientInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation(options =>
-                {
-                    options.SetDbStatementForText = true;
-                })
-                .AddConsoleExporter()
-                .AddJaegerExporter(jaegerOptions =>
-                {
-                    jaegerOptions.AgentHost = Environment.GetEnvironmentVariable("JAEGER_HOST") ?? "localhost";
-                    jaegerOptions.AgentPort = int.Parse(Environment.GetEnvironmentVariable("JAEGER_PORT") ?? "6831");
-                }))
-        .WithMetrics(metrics =>
-            metrics
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation()
-                .AddConsoleExporter());
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation(options =>
+            {
+                options.RecordException = true;
+            })
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation(options =>
+            {
+                options.SetDbStatementForText = true;
+            })
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(otlpEndpoint);
+            }))
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(otlpEndpoint);
+            }))
+        .WithLogging(logging =>
+        {
+            logging.AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri(otlpEndpoint);
+            });
+        });
 
     builder.Logging.AddOpenTelemetry(loggerOptions =>
     {

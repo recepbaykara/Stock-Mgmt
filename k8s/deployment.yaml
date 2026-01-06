@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: stock-mgmt
-          image: ghcr.io/recepbaykara/stock-mgmt:sha-8e1746c6983ea57644874a1b3fcc3d67b425eb1d
+          image: ghcr.io/recepbaykara/stock-mgmt:sha-121789efdfc16f204ea32befca1443e65194ba8c
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

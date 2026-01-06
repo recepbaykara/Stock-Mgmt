@@ -124,6 +124,8 @@ kubectl apply -f k8s/postgres.yaml
 
 # Migration varsa uygula
 if [ -f "k8s/migration.yaml" ]; then
+    echo "   → Eski migration job'u temizleniyor..."
+    kubectl delete job stock-mgmt-migration -n default --ignore-not-found
     kubectl apply -f k8s/migration.yaml
     echo "   → Migration job uygulandı"
     sleep 5
